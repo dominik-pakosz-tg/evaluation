@@ -1,0 +1,45 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    app.notification_senders:
+        - 'App\NotificationPublisher\Infrastructure\Push\EchoPushNotificationSender'
+        - 'App\NotificationPublisher\Infrastructure\SMS\EchoSMSSender'
+        - 'App\NotificationPublisher\Infrastructure\Email\EchoEmailSender'
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+    App\Controller\:
+        resource: '../src/Controller'
+        tags: ['controller.service_arguments']
+        
+    App\NotificationPublisher\Infrastructure\Push\EchoPushNotificationSender:
+        public: true
+        
+    App\NotificationPublisher\Infrastructure\SMS\EchoSMSSender:
+        public: true
+        
+    App\NotificationPublisher\Infrastructure\Email\EchoEmailSender:
+        public: true
+        
+    App\NotificationPublisher\Infrastructure\NotificationDispatcherFactory:
+        arguments: ['@service_container', '%app.notification_senders%']
+    
+    App\NotificationPublisher\Infrastructure\NotificationDispatcher:
+        factory: ['@App\NotificationPublisher\Infrastructure\NotificationDispatcherFactory', 'createNotificationDispatcher']

@@ -1,0 +1,7 @@
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+
+dummy_test:
+    path: /notification
+    controller: App\Controller\NotificationsController::create
